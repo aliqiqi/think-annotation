@@ -3,27 +3,24 @@
 namespace think\annotation;
 
 use Doctrine\Common\Annotations\Reader;
-use ReflectionMethod;
+use think\annotation\route\Route;
 use think\App;
 use think\event\RouteLoaded;
-use think\Request;
 
 /**
  * Trait InteractsWithRoute
  * @package think\annotation\traits
- * @property App    $app
+ * @property App $app
  * @property Reader $reader
  */
 trait InteractsWithRoute
 {
-    
+
     /**
      * @var \think\Route
      */
     protected $route;
-    
-    use InteractsWithRouteAnnotion;
-    
+
     /**
      * 注册注解路由
      */
@@ -35,7 +32,7 @@ trait InteractsWithRoute
                 $this->route = $this->app->route;
 
                 $dirs = [$this->app->getAppPath() . $this->app->config->get('route.controller_layer')]
-                 + $this->app->config->get('annotation.route.controllers', []);
+                    + $this->app->config->get('annotation.route.controllers', []);
 
                 foreach ($dirs as $dir) {
                     if (is_dir($dir)) {
@@ -49,55 +46,56 @@ trait InteractsWithRoute
     protected function scanDir($dir)
     {
         foreach ($this->findClasses($dir) as $class) {
-            $refClass        = new \ReflectionClass($class);
-            $routeGroup      = false;
-            $routeMiddleware = [];
-            $callback        = null;
-
-            //类
-            /** @var Resource $resource */
-            $this->setClassRouteResource($refClass,$class,$callback);
-
-            $this->setClassRouteMiddleware($refClass,$routeGroup,$routeMiddleware);
-
-            /** @var Group $group */
-            $this->setClassRouteGroup($refClass,$routeMiddleware,$routeGroup,$callback);
-
-            //方法
+            $refClass = new \ReflectionClass($class);
+            $this->setClassAnnotations($refClass);
             foreach ($refClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $refMethod) {
-
-                /** @var Route $route */
                 if ($route = $this->reader->getMethodAnnotation($refMethod, Route::class)) {
-
-                   $rule = $this->setMethodRoute($route,$refMethod,$routeGroup,$class);
-                    
-                   $this->setMethodRouteMiddleware($refMethod,$rule);
-                   
-                   $this->setMethodRouteGroup($refMethod,$rule);
-
-                   $this->setMethodRouteModel($refMethod,$rule);
-
-                   $this->setMethodRouteValidate($refMethod,$rule);
-
-                   $this->setMethodRouteParamValidate($refMethod);
-                   
-                   $this->setMethodRbac($refMethod);
-
-                   $this->setMethodLogger($refMethod);
-
-                   $this->setMethodJwt($refMethod);
+                    $rule = $this->route->addRule($route->value, "{$class}@{$refMethod->getName()}", $route->method);
+                    $rule->option($route->getOptions());
+                    $annotations = $this->reader->getMethodAnnotations($refMethod);
+                    $this->setMethodAnnotations($refMethod,$annotations,$rule);
                 }
             }
         }
     }
 
-    protected function getMethodAnnotations(ReflectionMethod $method, $annotationName)
+    protected function setClassAnnotations(\ReflectionClass $refClass)
     {
-        $annotations = $this->reader->getMethodAnnotations($method);
+        // 类
+        $annotations = $this->reader->getClassAnnotations($refClass);
+        foreach ($annotations as $annotation) {
+            $cls_name = basename(str_replace('\\', '/', get_class($annotation)));
+            if (class_exists($this->think['annotation'] . $cls_name)) {
+                $class = $this->think['handler'] . $cls_name;
+            } elseif (class_exists($this->custom['annotation'] . $cls_name)) {
+                $class = $this->custom['handler'] . $cls_name;
+            } elseif (isset($this->annotation[get_class($annotation)])) {
+                $class = $this->annotation[get_class($annotation)];
+            }else{
+                return ;
+            }
+            (new $class())->cls($refClass, $annotation, $this->route);
+        }
+    }
 
-        return array_filter($annotations, function ($annotation) use ($annotationName) {
-            return $annotation instanceof $annotationName;
-        });
+    protected function setMethodAnnotations($refMethod,$annotations,$rule)
+    {
+        //方法
+        foreach ($annotations as $annotation) {
+            if ($annotation instanceof Route) continue ;
+            $class = get_class($annotation);
+            $cls_name = basename(str_replace('\\', '/',$class));
+            if (class_exists($this->think['annotation'] . $cls_name)) {
+                $class = $this->think['handler'] . $cls_name;
+            } elseif (class_exists($this->custom['annotation'] . $cls_name)) {
+                $class = $this->custom['handler'] . $cls_name;
+            } elseif (isset($this->annotation[$class])) {
+                $class = $this->annotation[$class];
+            }else{
+                return ;
+            }
+            (new $class())->func($refMethod, $annotation, $rule);
+        }
     }
 
 }

@@ -2,6 +2,7 @@
 
 namespace think\annotation;
 
+use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\Reader;
@@ -13,19 +14,41 @@ class Service extends \think\Service
     /** @var Reader */
     protected $reader;
 
+    /** @var array */
+    protected $annotation = [];
+
+    /** @var string */
+    protected $think = [
+        'annotation' => 'think\annotation\Route\\',
+        'handler' => 'think\annotation\handler\\',
+    ];
+
+    /** @var string */
+    protected $custom = [
+        'annotation' => 'app\annotation\\',
+        'handler' => 'app\annotation\handler\\'
+    ];
+
     public function register()
     {
-        AnnotationReader::addGlobalIgnoredName('mixin');
+        AnnotationReader::addGlobalIgnoredName('think');
 
         // TODO: this method is deprecated and will be removed in doctrine/annotations 2.0
         AnnotationRegistry::registerLoader('class_exists');
 
         $this->reader = new CachedReader(new AnnotationReader(), $this->app);
+
+        $this->setCustomAnnotation();
+
         //注解路由
         $this->registerAnnotationRoute();
 
         //自动注入
         $this->autoInject();
+    }
+
+    protected function setCustomAnnotation(){
+        $this->annotation = config('annotation.custom');
     }
 
     /**

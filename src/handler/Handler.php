@@ -17,4 +17,13 @@ abstract class Handler implements HandleInterface
     {
         // TODO: Implement func() method.
     }
+
+    public function isCurrentMethod(\think\route\RuleItem $rule){
+        if (PHP_SAPI != 'cli'){
+            if($rule->getRule() == trim($_SERVER['PATH_INFO'],'/')){
+                return true;
+            }
+        }
+        return false;
+    }
 }

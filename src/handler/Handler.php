@@ -20,7 +20,7 @@ abstract class Handler implements HandleInterface
 
     public function isCurrentMethod(\think\route\RuleItem $rule){
         if (PHP_SAPI != 'cli'){
-            if($rule->getRule() == trim($_SERVER['PATH_INFO'],'/')){
+            if($rule->getRule() == trim(explode('?',$_SERVER['REQUEST_URI'])[0],'/')){
                 return true;
             }
         }

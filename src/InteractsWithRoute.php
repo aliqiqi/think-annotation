@@ -91,9 +91,7 @@ trait InteractsWithRoute
             //绑定模型,支持多个
             if (!empty($annotation instanceof Model)) {
                 /** @var Model $model */
-                foreach ($annotation as $model) {
-                    $rule->model($model->var, $model->value, $model->exception);
-                }
+                $rule->model($model->var, $model->value, $model->exception);
             }
             //验证
             /** @var Validate $validate */
@@ -150,13 +148,5 @@ trait InteractsWithRoute
                 (new $class())->cls($refClass, $annotation, $this->route);
             }
         }
-    }
-
-    protected function getMethodAnnotations(ReflectionMethod $method, $annotationName)
-    {
-        $annotations = $this->reader->getMethodAnnotations($method);
-        return array_filter($annotations, function ($annotation) use ($annotationName) {
-            return $annotation instanceof $annotationName;
-        });
     }
 }

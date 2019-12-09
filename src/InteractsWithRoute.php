@@ -143,7 +143,6 @@ trait InteractsWithRoute
             }
             /** @var  */
             if (isset($this->annotation[get_class($annotation)])) {
-                $cls_name = basename(str_replace('\\', '/', get_class($annotation)));
                 $class = $this->annotation[get_class($annotation)];
                 (new $class())->cls($refClass, $annotation, $this->route);
             }

@@ -18,13 +18,9 @@ abstract class Handler implements HandleInterface
         // TODO: Implement func() method.
     }
 
-    public function isCurrentMethod(\ReflectionMethod $refMethod,\think\route\RuleItem $rule){
+    public function isCurrentMethod(\think\route\RuleItem $rule){
         if (PHP_SAPI != 'cli'){
-            if(
-                $refMethod->class.'@'.$refMethod->name == $rule->checkUrl(request()->url())->getRoute()
-                and
-                $rule->getMethod() == strtolower(request()->method())
-            ){
+            if($rule->getRule() == trim(explode('?',$_SERVER['REQUEST_URI'])[0],'/')){
                 return true;
             }
         }

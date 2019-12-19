@@ -1,7 +1,7 @@
 {
     "name": "lazyskills/think-annotation",
     "description": "Annotation Plus For ThinkPHP6",
-    "license": "Apache-2.0",
+    "license": "MIT",
     "authors": [
         {
             "name": "china_wangyu",
@@ -12,8 +12,7 @@
     "require": {
         "topthink/framework": "^6.0",
         "doctrine/annotations": "^1.6",
-        "php-di/phpdoc-reader": "^2.1",
-        "firebase/php-jwt": "^5.0"
+        "php-di/phpdoc-reader": "^2.1"
     },
     "autoload": {
         "psr-4": {

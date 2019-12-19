@@ -180,9 +180,6 @@ class IndexController
        'management' => true,
        'custom' => [
            # 格式：注解类 => 注解操作类
-           \app\annotation\Param::class => \app\annotation\handler\Param::class, # 单个参数验证器
-           \app\annotation\Jwt::class => \app\annotation\handler\Jwt::class, # Jwt请求验证器
-           \app\annotation\Doc::class => \app\annotation\handler\Doc::class, # 接口文档生成器
            \app\annotation\User::class => \app\annotation\handler\User::class, # 这里写上你的注解
        ]
    ];

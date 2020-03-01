@@ -67,6 +67,9 @@ trait InteractsWithRoute
                 if ($route = $this->reader->getMethodAnnotation($refMethod, Route::class)) {
                     //注册路由
                     $rule = $routeGroup->addRule($route->value, "{$class}@{$refMethod->getName()}", $route->method);
+                    if($this->app->config->get('annotation.cross_domain.enable', true)){
+                        $rule = $rule->allowCrossDomain($this->app->config->get('annotation.cross_domain.header'));
+                    }
                     $rule->option($route->getOptions());
                     $this->setMethodAnnotations($refMethod,$rule);
                 }

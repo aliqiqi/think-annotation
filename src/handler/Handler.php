@@ -26,14 +26,11 @@ abstract class Handler implements HandleInterface
             if (count($requestRule) !== count($routeRule))return false;
             foreach($requestRule as $k => $v){
                 if($requestRule[$k] !== $routeRule[$k]){
-                    if (strstr($routeRule[$k],'<') and strstr($routeRule[$k],'>')) {
-                        continue;
-                    }else{
+                    if (!strstr($routeRule[$k],'<')){
                         return false;
                     }
-                }else{
-                    continue;
                 }
+                continue;
             }
             return true;
         }
